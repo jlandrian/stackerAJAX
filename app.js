@@ -6,7 +6,17 @@ $(document).ready( function() {
 		var tags = $(this).find("input[name='tags']").val();
 		getUnanswered(tags);
 	});
+
+
+	$(".inspiration-getter").submit( function(event) {
+		//clear results div
+		$(".results").html(" ");
+		//get the value of the answerers field the user submitted
+		var answerers = $(this).find("input[name='answerers']").val();
+		getInspiration(answerers);
+	});
 });
+
 
 // this function takes the question object returned by StackOverflow 
 // and creates new result to be appended to DOM
@@ -32,13 +42,44 @@ var showQuestion = function(question) {
 	// set some properties related to asker
 	var asker = result.find('.asker');
 	asker.html('<p>Name: <a target="_blank" href=http://stackoverflow.com/users/' + question.owner.user_id + ' >' +
-													question.owner.display_name +
-												'</a>' +
+													question.owner.display_name + 
+													'</a>' + 
 							'</p>' +
  							'<p>Reputation: ' + question.owner.reputation + '</p>'
-	);
+ 	 );
 
 	return result;
+};
+
+//my showAnswerer function. It SHOULD work...
+var showAnswerer = function(answerer) {
+	
+	//clone the answerer template
+	var result = $(".templates .answerer").clone();
+
+	//show a profile picture of the user
+	var picture = result.find(".profile-pic img");
+	picture.attr("src", answerer.user.profile_image);
+
+	//show the display name
+	var name = result.find(".display-name");
+	name.text(answerer.user.display_name);
+
+	//link to the user profile
+	var userLink = result.find(".user-link a");
+	userLink.attr("href", answerer.user.link);
+	userLink.text(answerer.user.link);
+
+	//the user's reputation
+	var repuationPoints = result.find(".reputation");
+	repuationPoints.text(answerer.user.reputation);
+
+	//the user's post count
+	var postCount = result.find(".post-count");
+	postCount.text(answerer.post_count);
+
+	return result;
+
 };
 
 
@@ -87,6 +128,36 @@ var getUnanswered = function(tags) {
 		$('.search-results').append(errorElem);
 	});
 };
+
+var getInspiration = function(tag) {
+
+
+
+	//the Ajax
+	var result = $.ajax({
+		url: "http://api.stackexchange.com/2.2/tags/" + tag + "/top-answerers/all_time?site=stackoverflow",
+		dataType: "jsonp",
+		type: "GET",
+	})
+
+	.done(function(result){
+		var searchResults = showSearchResults(tag, result.items.length);
+
+		$(".search-results").html(searchResults);
+
+		$.each(result.items, function(i, item) {
+			var question = showQuestion(item);
+			$('.results').append(question);
+		});
+	})
+	.fail(function(jqXHR, error, errorThrown){
+		var errorElem = showError(error);
+		$('.search-results').append(errorElem);
+	});
+};
+
+
+
 
 
 
