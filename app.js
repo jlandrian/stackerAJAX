@@ -131,8 +131,6 @@ var getUnanswered = function(tags) {
 
 var getInspiration = function(tag) {
 
-
-
 	//the Ajax
 	var result = $.ajax({
 		url: "http://api.stackexchange.com/2.2/tags/" + tag + "/top-answerers/all_time?site=stackoverflow",
@@ -146,8 +144,8 @@ var getInspiration = function(tag) {
 		$(".search-results").html(searchResults);
 
 		$.each(result.items, function(i, item) {
-			var question = showQuestion(item);
-			$('.results').append(question);
+			var answerer = showAnswerer(item);
+			$('.results').append(answerer);
 		});
 	})
 	.fail(function(jqXHR, error, errorThrown){
